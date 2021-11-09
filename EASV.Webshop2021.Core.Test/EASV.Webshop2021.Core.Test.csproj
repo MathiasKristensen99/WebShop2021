@@ -12,6 +12,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\EASV.Webshop2021.Core\EASV.Webshop2021.Core.csproj" />
+      <ProjectReference Include="..\EASV.Webshop2021.Domain\EASV.Webshop2021.Domain.csproj" />
     </ItemGroup>
 
 </Project>

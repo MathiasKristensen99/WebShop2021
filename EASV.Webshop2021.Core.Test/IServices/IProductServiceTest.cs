@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using EASV.Webshop2021.Core.IServices;
 using EASV.Webshop2021.Core.Models;
+using EASV.Webshop2021.Domain.Services;
 using Moq;
 using Xunit;
 

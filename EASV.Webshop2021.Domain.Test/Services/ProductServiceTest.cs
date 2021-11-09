@@ -65,6 +65,29 @@ namespace EASV.Webshop2021.Domain.Test.Services
         }
 
         #endregion
+
+        #region ProductService Create
+        
+        [Fact]
+        public void CreateProduct()
+        {
+            var expected = new Product
+            {
+                Id = 1,
+                Name = "test"
+            };
+            
+            var repoMock = new Mock<IProductRepository>();
+            repoMock.Setup(repository => repository.CreateProduct(expected)).Returns(expected);
+
+            ProductService productService = new ProductService(repoMock.Object);
+
+            productService.CreateProduct(expected);
+
+            Assert.Equal(expected, productService.CreateProduct(expected));
+        }
+        
+        #endregion
     }
 
     public class ProductComparer : IEqualityComparer<Product>

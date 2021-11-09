@@ -13,4 +13,8 @@
       <Folder Include="Controllers" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\EASV.Webshop2021.Core\EASV.Webshop2021.Core.csproj" />
+    </ItemGroup>
+
 </Project>

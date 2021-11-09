@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.IO.Pipes;
 using EASV.Webshop2021.Core.Models;
+using EASV.WebShop2021.DB.Entities;
 using EASV.Webshop2021.Domain.IRepositories;
 
 namespace EASV.WebShop2021.DB
@@ -20,7 +22,17 @@ namespace EASV.WebShop2021.DB
 
         public Product CreateProduct(Product product)
         {
-            throw new System.NotImplementedException();
+            var entity = _ctx.Products.Add(new ProductEntity
+            {
+                Id = product.Id,
+                Name = product.Name
+            }).Entity;
+
+            return new Product
+            {
+                Id = entity.Id,
+                Name = entity.Name
+            };
         }
     }
 }
