@@ -34,5 +34,16 @@ namespace EASV.WebShop2021.DB
                 Name = entity.Name
             };
         }
+
+        public Product DeleteProduct(int id)
+        {
+            var entity = _ctx.Products.Remove(new ProductEntity {Id = id}).Entity;
+            _ctx.SaveChanges();
+            return new Product
+            {
+                Id = entity.Id,
+                Name = entity.Name
+            };
+        }
     }
 }

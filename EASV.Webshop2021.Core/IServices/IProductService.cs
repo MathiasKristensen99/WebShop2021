@@ -8,5 +8,7 @@ namespace EASV.Webshop2021.Core.IServices
         List<Product> GetAll();
 
         Product CreateProduct(Product product);
+
+        Product DeleteProduct(int id);
     }
 }

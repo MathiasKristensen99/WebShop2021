@@ -8,5 +8,7 @@ namespace EASV.Webshop2021.Domain.IRepositories
         List<Product> ReadAll();
 
         Product CreateProduct(Product product);
+
+        Product DeleteProduct(int id);
     }
 }

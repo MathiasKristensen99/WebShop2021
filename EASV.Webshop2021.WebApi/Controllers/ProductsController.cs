@@ -54,5 +54,11 @@ namespace EASV.Webshop2021.WebApi.Controllers
                 return BadRequest(ae.Message);
             }
         }
+
+        [HttpDelete("{id}")]
+        public Product Delete(int id)
+        {
+            return _productService.DeleteProduct(id);
+        }
     }
 }
