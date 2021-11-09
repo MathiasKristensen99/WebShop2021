@@ -26,9 +26,9 @@ namespace EASV.Webshop2021.Domain.Services
             return _productRepository.ReadAll();
         }
 
-        public Product CreatePet(Product product)
+        public Product CreateProduct(Product product)
         {
-            throw new System.NotImplementedException();
+            return _productRepository.CreateProduct(product);
         }
     }
 }

@@ -7,6 +7,6 @@ namespace EASV.Webshop2021.Core.IServices
     {
         List<Product> GetAll();
 
-        Product CreatePet(Product product);
+        Product CreateProduct(Product product);
     }
 }
