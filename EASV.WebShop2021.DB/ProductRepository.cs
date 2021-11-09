@@ -6,6 +6,13 @@ namespace EASV.WebShop2021.DB
 {
     public class ProductRepository : IProductRepository
     {
+        private readonly WebShopDbContext _ctx;
+
+        public ProductRepository(WebShopDbContext context)
+        {
+            _ctx = context;
+        }
+        
         public List<Product> ReadAll()
         {
             throw new System.NotImplementedException();
