@@ -6,5 +6,7 @@ namespace EASV.Webshop2021.Core.IServices
     public interface IProductService
     {
         List<Product> GetAll();
+
+        Product CreatePet(Product product);
     }
 }
