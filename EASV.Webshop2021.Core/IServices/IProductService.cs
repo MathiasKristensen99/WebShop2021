@@ -10,5 +10,6 @@ namespace EASV.Webshop2021.Core.IServices
         Product CreateProduct(Product product);
 
         Product DeleteProduct(int id);
+        Product UpdateProduct(int id, string Name);
     }
 }

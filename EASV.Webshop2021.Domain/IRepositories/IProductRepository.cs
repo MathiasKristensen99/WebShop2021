@@ -10,5 +10,7 @@ namespace EASV.Webshop2021.Domain.IRepositories
         Product CreateProduct(Product product);
 
         Product DeleteProduct(int id);
+
+        Product UpdateProduct(int id, string Name);
     }
 }

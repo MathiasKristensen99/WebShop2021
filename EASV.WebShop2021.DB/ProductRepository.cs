@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO.Pipes;
 using EASV.Webshop2021.Core.Models;
 using EASV.WebShop2021.DB.Entities;
@@ -39,6 +40,17 @@ namespace EASV.WebShop2021.DB
         {
             var entity = _ctx.Products.Remove(new ProductEntity {Id = id}).Entity;
             _ctx.SaveChanges();
+            return new Product
+            {
+                Id = entity.Id,
+                Name = entity.Name
+            };
+        }
+
+        public Product UpdateProduct(int id, string Name)
+        {
+            var entity = _ctx.Products.Update(new ProductEntity {Id = id}).Entity;
+            entity.Name = Name;
             return new Product
             {
                 Id = entity.Id,

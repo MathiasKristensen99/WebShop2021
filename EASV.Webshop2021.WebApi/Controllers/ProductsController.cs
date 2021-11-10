@@ -60,5 +60,13 @@ namespace EASV.Webshop2021.WebApi.Controllers
         {
             return _productService.DeleteProduct(id);
         }
+
+        [HttpPut("{id}/{name}")]
+        public Product UpdateProduct(int id, string name)
+        {
+            return _productService.UpdateProduct(id, name);
+        }
+        
+        
     }
 }
