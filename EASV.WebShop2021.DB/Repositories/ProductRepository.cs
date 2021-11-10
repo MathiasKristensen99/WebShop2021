@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Pipes;
+﻿using System.Collections.Generic;
+using System.Linq;
 using EASV.Webshop2021.Core.Models;
 using EASV.WebShop2021.DB.Entities;
 using EASV.Webshop2021.Domain.IRepositories;
 
-namespace EASV.WebShop2021.DB
+namespace EASV.WebShop2021.DB.Repositories
 {
     public class ProductRepository : IProductRepository
     {
@@ -18,7 +17,11 @@ namespace EASV.WebShop2021.DB
         
         public List<Product> ReadAll()
         {
-            throw new System.NotImplementedException();
+            return _ctx.Products.Select(entity => new Product
+            {
+                Id = entity.Id,
+                Name = entity.Name
+            }).ToList();
         }
 
         public Product CreateProduct(Product product)

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using EASV.Webshop2021.Core.IServices;
 using EASV.WebShop2021.DB;
+using EASV.WebShop2021.DB.Entities;
+using EASV.WebShop2021.DB.Repositories;
 using EASV.Webshop2021.Domain.IRepositories;
 using EASV.Webshop2021.Domain.Services;
 using Microsoft.AspNetCore.Builder;
@@ -59,7 +61,7 @@ namespace EASV.Webshop2021.WebApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, WebShopDbContext ctx)
         {
             if (env.IsDevelopment())
             {
@@ -69,11 +71,17 @@ namespace EASV.Webshop2021.WebApi
                 
                 using (var scope = app.ApplicationServices.CreateScope())
                 {
-                    var services = scope.ServiceProvider;
-                    var ctx = services.GetService<WebShopDbContext>();
-                    
+                    //var services = scope.ServiceProvider;
+                    //var ctx = services.GetService<WebShopDbContext>();
                     ctx.Database.EnsureDeleted();
                     ctx.Database.EnsureCreated();
+                    ctx.Products.AddRange(new List<ProductEntity>
+                    {
+                        new ProductEntity{Name = "Product1"},
+                        new ProductEntity{Name = "Product2"},
+                        new ProductEntity{Name = "Product3"}
+                    });
+                    ctx.SaveChanges();
                 }
             }
 

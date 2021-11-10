@@ -24,16 +24,24 @@ namespace EASV.Webshop2021.WebApi.Controllers
         [HttpGet]
         public ActionResult<ProductsDto> GetAllProducts()
         {
-            var dto = new ProductsDto();
-            dto.List = new List<ProductDto>
+            try
             {
-                new ProductDto{Id = 1, Name = "Fuck"},
-                new ProductDto{Id = 2, Name = "Lort"},
-                new ProductDto{Id = 3, Name = "Pis"},
-                new ProductDto{Id = 4, Name = "ForbandedeBøsselort"}
-            };
+                var products = _productService.GetAll()
+                    .Select(product => new ProductDto
+                    {
+                        Id = product.Id,
+                        Name = product.Name
+                    }).ToList();
             
-            return Ok(dto);
+                return Ok(new ProductsDto
+                {
+                    List = products
+                });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
         }
 
         [HttpPost]
