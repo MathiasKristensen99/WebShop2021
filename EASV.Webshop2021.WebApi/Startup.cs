@@ -50,7 +50,7 @@ namespace EASV.Webshop2021.WebApi
                 {
                     opt
                         .UseLoggerFactory(loggerFactory)
-                        .UseSqlite("Data Source=PetShopApp.db");
+                        .UseSqlite("Data Source=WebShopApp.db");
                 }, ServiceLifetime.Transient);
 
             services.AddCors(options => options
