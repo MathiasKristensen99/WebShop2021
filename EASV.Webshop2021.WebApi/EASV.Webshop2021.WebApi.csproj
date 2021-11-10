@@ -5,6 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.10" />
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
     </ItemGroup>
@@ -15,6 +16,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\EASV.Webshop2021.Core\EASV.Webshop2021.Core.csproj" />
+      <ProjectReference Include="..\EASV.WebShop2021.DB\EASV.WebShop2021.DB.csproj" />
+      <ProjectReference Include="..\EASV.Webshop2021.Domain\EASV.Webshop2021.Domain.csproj" />
     </ItemGroup>
 
 </Project>

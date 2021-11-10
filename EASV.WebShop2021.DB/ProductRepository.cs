@@ -29,6 +29,8 @@ namespace EASV.WebShop2021.DB
                 Name = product.Name
             }).Entity;
 
+            _ctx.SaveChanges();
+
             return new Product
             {
                 Id = entity.Id,

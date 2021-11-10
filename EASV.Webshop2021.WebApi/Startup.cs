@@ -2,10 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EASV.Webshop2021.Core.IServices;
+using EASV.WebShop2021.DB;
+using EASV.Webshop2021.Domain.IRepositories;
+using EASV.Webshop2021.Domain.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -32,6 +37,22 @@ namespace EASV.Webshop2021.WebApi
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "EASV.Webshop2021.WebApi", Version = "v1"});
             });
 
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+            
+            var loggerFactory = LoggerFactory.Create(builder => {
+                    builder.AddConsole();
+                }
+            );
+            
+            services.AddDbContext<WebShopDbContext>(
+                opt =>
+                {
+                    opt
+                        .UseLoggerFactory(loggerFactory)
+                        .UseSqlite("Data Source=PetShopApp.db");
+                }, ServiceLifetime.Transient);
+
             services.AddCors(options => options
                 .AddPolicy("dev-policy", policy =>
                     policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
@@ -45,6 +66,15 @@ namespace EASV.Webshop2021.WebApi
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EASV.Webshop2021.WebApi v1"));
+                
+                using (var scope = app.ApplicationServices.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
+                    var ctx = services.GetService<WebShopDbContext>();
+                    
+                    ctx.Database.EnsureDeleted();
+                    ctx.Database.EnsureCreated();
+                }
             }
 
             app.UseHttpsRedirection();
