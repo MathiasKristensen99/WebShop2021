@@ -18,6 +18,7 @@
       <ProjectReference Include="..\EASV.Webshop2021.Core\EASV.Webshop2021.Core.csproj" />
       <ProjectReference Include="..\EASV.WebShop2021.DB\EASV.WebShop2021.DB.csproj" />
       <ProjectReference Include="..\EASV.Webshop2021.Domain\EASV.Webshop2021.Domain.csproj" />
+      <ProjectReference Include="..\EASV.WebShop2021.Security\EASV.WebShop2021.Security.csproj" />
     </ItemGroup>
 
 </Project>

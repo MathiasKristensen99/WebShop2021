@@ -14,12 +14,19 @@ namespace EASV.WebShop2021.Security.Services
     public class AuthService : IAuthService
     {
         private readonly IConfiguration _configuration;
-        public readonly AuthDbContext _ctx;
+        private readonly AuthDbContext _ctx;
+
+        private byte[] secretBytes;
 
         public AuthService(IConfiguration configuration, AuthDbContext ctx)
         {
             _configuration = configuration;
             _ctx = ctx;
+        }
+
+        public AuthService(Byte[] secret)
+        {
+            secretBytes = secret;
         }
         
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
