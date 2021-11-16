@@ -57,21 +57,22 @@ namespace EASV.WebShop2021.Security.Services
 
         public string GenerateJwtToken(LoginUser user)
         {
-            var userFound = IsValidUserInformation(user);
-            if (userFound == null) return null;
-           
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:key"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var claims = new List<Claim>
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("Id", userFound.Id.ToString()), new Claim("UserName", userFound.UserName) }),
-                Expires = DateTime.UtcNow.AddDays(14),
-                Issuer = _configuration["Jwt:Issuer"],
-                Audience = _configuration["Jwt:Audience"],
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Sid, user.Id.ToString())
             };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+
+            var token = new JwtSecurityToken(
+                new JwtHeader(new SigningCredentials(new SymmetricSecurityKey(secretBytes),
+                    SecurityAlgorithms.HmacSha256)),
+                new JwtPayload(null,
+                    null,
+                    claims.ToArray(),
+                    DateTime.Now,
+                    DateTime.Now.AddMinutes(10)));
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         public List<Permission> GetPermissions(int userId)

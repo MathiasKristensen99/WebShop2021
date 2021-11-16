@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
+using System.Text;
 using System.Threading.Tasks;
 using EASV.Webshop2021.Core.IServices;
 using EASV.WebShop2021.DB;
@@ -8,6 +10,12 @@ using EASV.WebShop2021.DB.Entities;
 using EASV.WebShop2021.DB.Repositories;
 using EASV.Webshop2021.Domain.IRepositories;
 using EASV.Webshop2021.Domain.Services;
+using EASV.WebShop2021.Security;
+using EASV.WebShop2021.Security.Repositories;
+using EASV.WebShop2021.Security.Services;
+using EASV.Webshop2021.WebApi.PolicyHandlers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -17,6 +25,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace EASV.Webshop2021.WebApi
@@ -37,8 +46,31 @@ namespace EASV.Webshop2021.WebApi
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "EASV.Webshop2021.WebApi", Version = "v1"});
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"",
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
             });
-
+            
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IProductRepository, ProductRepository>();
             
@@ -47,6 +79,32 @@ namespace EASV.Webshop2021.WebApi
                 }
             );
             
+            Byte[] secretBytes = new byte[40];
+
+            using (var rngCsp = new System.Security.Cryptography.RNGCryptoServiceProvider() {})
+            {
+                rngCsp.GetBytes(secretBytes);
+            }
+
+            services.AddAuthentication(option =>
+            {
+                option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Configuration["Jwt:Issuer"],
+                    ValidAudience = Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])) //Configuration["JwtToken:SecretKey"]
+                };
+            });
+            
             services.AddDbContext<WebShopDbContext>(
                 opt =>
                 {
@@ -54,6 +112,28 @@ namespace EASV.Webshop2021.WebApi
                         .UseLoggerFactory(loggerFactory)
                         .UseSqlite("Data Source=WebShopApp.db");
                 }, ServiceLifetime.Transient);
+            
+            services.AddDbContext<AuthDbContext>(opt =>
+            {
+                opt.UseLoggerFactory(loggerFactory).
+                UseSqlite("Data Source=auth.db"); 
+            }, ServiceLifetime.Transient);
+            
+            services.AddTransient<ISecurityInitializer, SecurityInitializer>();
+            services.AddScoped<LoginUserRepository>();
+
+            services.AddSingleton<IAuthorizationHandler, CanWriteProductsHandler>();
+            services.AddSingleton<IAuthorizationHandler, CanReadProductsHandler>();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(nameof(CanWriteProductsHandler), 
+                    policy => policy.Requirements.Add(new CanWriteProductsHandler()));
+                options.AddPolicy(nameof(CanReadProductsHandler), 
+                    policy => policy.Requirements.Add(new CanReadProductsHandler()));
+            });
+            
+            services.AddSingleton<IAuthService>(new AuthService(secretBytes));
+            services.AddScoped<IUserAuthenticatorService, UserAuthenticatorService>();
 
             services.AddCors(options => options
                 .AddPolicy("dev-policy", policy =>
@@ -61,7 +141,7 @@ namespace EASV.Webshop2021.WebApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, WebShopDbContext ctx)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -71,7 +151,12 @@ namespace EASV.Webshop2021.WebApi
                 
                 using (var scope = app.ApplicationServices.CreateScope())
                 {
-                    //var services = scope.ServiceProvider;
+                    var services = scope.ServiceProvider;
+                    var ctx = services.GetService<WebShopDbContext>();
+                    var securityCtx = services.GetService<AuthDbContext>();
+                    var dbSecurityInit = services.GetService<ISecurityInitializer>();
+                    dbSecurityInit.Initialize(securityCtx);
+
                     //var ctx = services.GetService<WebShopDbContext>();
                     ctx.Database.EnsureDeleted();
                     ctx.Database.EnsureCreated();
@@ -86,6 +171,9 @@ namespace EASV.Webshop2021.WebApi
             }
             else
             {
+                var scope = app.ApplicationServices.CreateScope();
+                var services = scope.ServiceProvider;
+                var ctx = services.GetService<WebShopDbContext>();
                 ctx.Database.EnsureDeleted();
                 new DbSeeder(ctx).SeedProduction();
                 ctx.Products.AddRange(new List<ProductEntity>

@@ -15,18 +15,28 @@ namespace EASV.Webshop2021.WebApi.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly IUserAuthenticatorService _service;
 
-        public LoginController(IAuthService authService)
+        public LoginController(IUserAuthenticatorService service)
         {
-            _authService = authService;
+            _service = service;
         }
 
         [AllowAnonymous]
         [HttpPost(nameof(Login))]
         public IActionResult Login([FromBody] LoginDto dto)
         {
-            throw new NotImplementedException();
+            string userToken;
+            if (_service.Login(dto.Username, dto.Password, out userToken))
+            {
+                return Ok(new
+                {
+                    username = dto.Username,
+                    token = userToken
+                });
+            }
+
+            return Unauthorized("No access, bitch.");
         }
     }
 }

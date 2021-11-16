@@ -4,7 +4,7 @@ using EASV.WebShop2021.Security.Services;
 
 namespace EASV.WebShop2021.Security
 {
-    public class SecurityInitializer
+    public class SecurityInitializer : ISecurityInitializer
     {
         public void Initialize(AuthDbContext context)
         {
