@@ -86,7 +86,8 @@ namespace EASV.Webshop2021.WebApi
             }
             else
             {
-                new DbSeeder(ctx).SeedProduction();   
+                ctx.Database.EnsureDeleted();
+                new DbSeeder(ctx).SeedProduction();
                 ctx.Products.AddRange(new List<ProductEntity>
                 {
                     new ProductEntity{Name = "Stor fed idiot"},
