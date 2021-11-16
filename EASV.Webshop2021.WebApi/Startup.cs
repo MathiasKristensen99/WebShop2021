@@ -174,6 +174,9 @@ namespace EASV.Webshop2021.WebApi
                 var scope = app.ApplicationServices.CreateScope();
                 var services = scope.ServiceProvider;
                 var ctx = services.GetService<WebShopDbContext>();
+                var securityCtx = services.GetService<AuthDbContext>();
+                var dbSecurityInit = services.GetService<ISecurityInitializer>();
+                dbSecurityInit.Initialize(securityCtx);
                 ctx.Database.EnsureDeleted();
                 new DbSeeder(ctx).SeedProduction();
                 ctx.Products.AddRange(new List<ProductEntity>
