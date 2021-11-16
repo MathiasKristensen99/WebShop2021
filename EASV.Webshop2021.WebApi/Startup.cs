@@ -84,6 +84,17 @@ namespace EASV.Webshop2021.WebApi
                     ctx.SaveChanges();
                 }
             }
+            else
+            {
+                new DbSeeder(ctx).SeedProduction();   
+                ctx.Products.AddRange(new List<ProductEntity>
+                {
+                    new ProductEntity{Name = "Product1"},
+                    new ProductEntity{Name = "Product2"},
+                    new ProductEntity{Name = "Product3"}
+                });
+                ctx.SaveChanges();
+            }
 
             app.UseHttpsRedirection();
 
