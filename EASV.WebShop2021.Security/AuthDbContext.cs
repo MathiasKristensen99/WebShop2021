@@ -11,6 +11,7 @@ namespace EASV.WebShop2021.Security
         {
             modelBuilder.Entity<UserPermission>()
                 .HasKey(u => new {u.PermissionId, u.UserId});
+            
         }
 
         public DbSet<Permission> Permissions { get; set; }
