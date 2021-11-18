@@ -52,10 +52,16 @@ namespace EASV.WebShop2021.DB.Repositories
             };
         }
 
-        public Product UpdateProduct(int id, string Name)
+        public Product UpdateProduct(Product product)
         {
-            var entity = _ctx.Products.Update(new ProductEntity {Id = id}).Entity;
-            entity.Name = Name;
+            var entity = _ctx.Products.Update(new ProductEntity
+            {
+                Id = product.Id,
+                Name = product.Name
+            }).Entity;
+            
+            _ctx.SaveChanges();
+            
             return new Product
             {
                 Id = entity.Id,

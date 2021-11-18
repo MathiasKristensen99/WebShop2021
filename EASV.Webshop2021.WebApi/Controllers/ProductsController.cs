@@ -69,10 +69,19 @@ namespace EASV.Webshop2021.WebApi.Controllers
             return _productService.DeleteProduct(id);
         }
 
-        [HttpPut("{id}/{name}")]
-        public Product UpdateProduct(int id, string name)
+        [HttpPut("{id:int}")]
+        public ActionResult<ProductDto> UpdateProduct(int id, ProductDto dto)
         {
-            return _productService.UpdateProduct(id, name);
+            if (id != dto.Id)
+            {
+                return BadRequest("Ids dont match");
+            }
+            var product = _productService.UpdateProduct(new Product
+            {
+                Id = dto.Id,
+                Name = dto.Name
+            });
+            return Ok(dto);
         }
         
         

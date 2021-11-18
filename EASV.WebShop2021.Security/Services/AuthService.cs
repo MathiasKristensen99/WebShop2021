@@ -16,7 +16,7 @@ namespace EASV.WebShop2021.Security.Services
         private readonly IConfiguration _configuration;
         private readonly AuthDbContext _ctx;
 
-        private byte[] secretBytes;
+        //private byte[] secretBytes;
 
         public AuthService(IConfiguration configuration, AuthDbContext ctx)
         {
@@ -24,11 +24,6 @@ namespace EASV.WebShop2021.Security.Services
             _ctx = ctx;
         }
 
-        public AuthService(Byte[] secret)
-        {
-            secretBytes = secret;
-        }
-        
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new System.Security.Cryptography.HMACSHA512())
@@ -57,22 +52,31 @@ namespace EASV.WebShop2021.Security.Services
 
         public string GenerateJwtToken(LoginUser user)
         {
-            var claims = new List<Claim>
+            var userFound = IsValidUserInformation(user);
+            if (userFound == null) return null;
+           
+            var tokenHandler = new JwtSecurityTokenHandler();
+            Byte[] secretBytes = new byte[40];
+
+            using (var rngCsp = new System.Security.Cryptography.RNGCryptoServiceProvider() {})
             {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Sid, user.Id.ToString())
+                rngCsp.GetBytes(secretBytes);
+            }
+            
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("Id", userFound.Id.ToString()), 
+                    new Claim("UserName", userFound.UserName)
+                }),
+                Expires = DateTime.UtcNow.AddDays(14),
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"],
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretBytes), SecurityAlgorithms.HmacSha256Signature)
             };
-
-            var token = new JwtSecurityToken(
-                new JwtHeader(new SigningCredentials(new SymmetricSecurityKey(secretBytes),
-                    SecurityAlgorithms.HmacSha256)),
-                new JwtPayload(null,
-                    null,
-                    claims.ToArray(),
-                    DateTime.Now,
-                    DateTime.Now.AddMinutes(10)));
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
 
         public List<Permission> GetPermissions(int userId)
@@ -86,9 +90,12 @@ namespace EASV.WebShop2021.Security.Services
 
         public LoginUser IsValidUserInformation(LoginUser user)
         {
+            
             return _ctx.LoginUsers.FirstOrDefault(
                 loginUser => loginUser.UserName.Equals(user.UserName) &&
                              loginUser.PasswordHash.Equals(user.PasswordHash));
+                             
+            
         }
     }
 }

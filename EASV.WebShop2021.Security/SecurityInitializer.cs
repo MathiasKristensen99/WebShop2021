@@ -6,6 +6,11 @@ namespace EASV.WebShop2021.Security
 {
     public class SecurityInitializer : ISecurityInitializer
     {
+        private readonly IAuthService _service;
+        public SecurityInitializer(IAuthService authService)
+        {
+            _service = authService;
+        }
         public void Initialize(AuthDbContext context)
         {
             context.Database.EnsureDeleted();
@@ -14,10 +19,10 @@ namespace EASV.WebShop2021.Security
 
             context.SaveChanges();
 
-            var authenticationService = new AuthService(Array.Empty<byte>());
+            //var authenticationService = new AuthService(Array.Empty<byte>());
             var password = "password123";
             
-            authenticationService.CreatePasswordHash(password, out var pass, out var salt);
+            _service.CreatePasswordHash(password, out var pass, out var salt);
 
             LoginUser user = new LoginUser
             {
@@ -28,7 +33,7 @@ namespace EASV.WebShop2021.Security
             
             var password1 = "password321";
             
-            authenticationService.CreatePasswordHash(password, out var pass1, out var salt1);
+            _service.CreatePasswordHash(password, out var pass1, out var salt1);
 
             LoginUser user1 = new LoginUser
             {

@@ -36,9 +36,9 @@ namespace EASV.Webshop2021.Domain.Services
             return _productRepository.DeleteProduct(id);
         }
 
-        public Product UpdateProduct(int id, string Name)
+        public Product UpdateProduct(Product product)
         {
-            return _productRepository.UpdateProduct(id, Name);
+            return _productRepository.UpdateProduct(product);
         }
     }
 }

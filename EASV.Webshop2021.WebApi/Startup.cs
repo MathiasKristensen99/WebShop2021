@@ -73,6 +73,9 @@ namespace EASV.Webshop2021.WebApi
             
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<LoginUserRepository>();
+            services.AddScoped<IUserAuthenticatorService, UserAuthenticatorService>();
+            services.AddScoped<IAuthService, AuthService>();
             
             var loggerFactory = LoggerFactory.Create(builder => {
                     builder.AddConsole();
@@ -86,25 +89,6 @@ namespace EASV.Webshop2021.WebApi
                 rngCsp.GetBytes(secretBytes);
             }
 
-            services.AddAuthentication(option =>
-            {
-                option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-            }).AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = false,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = Configuration["Jwt:Issuer"],
-                    ValidAudience = Configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])) //Configuration["JwtToken:SecretKey"]
-                };
-            });
-            
             services.AddDbContext<WebShopDbContext>(
                 opt =>
                 {
@@ -120,10 +104,31 @@ namespace EASV.Webshop2021.WebApi
             }, ServiceLifetime.Transient);
             
             services.AddTransient<ISecurityInitializer, SecurityInitializer>();
-            services.AddScoped<LoginUserRepository>();
+            
+            
+            services.AddAuthentication(option =>
+            {
+                option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Configuration["Jwt:Issuer"],
+                    ValidAudience = Configuration["Jwt:Audience"],
+                    //IssuerSigningKey = new SymmetricSecurityKey(secretBytes),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SecretKey"])) //Configuration["JwtToken:SecretKey"]
+                };
+            });
 
             services.AddSingleton<IAuthorizationHandler, CanWriteProductsHandler>();
             services.AddSingleton<IAuthorizationHandler, CanReadProductsHandler>();
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(nameof(CanWriteProductsHandler), 
@@ -132,9 +137,6 @@ namespace EASV.Webshop2021.WebApi
                     policy => policy.Requirements.Add(new CanReadProductsHandler()));
             });
             
-            services.AddSingleton<IAuthService>(new AuthService(secretBytes));
-            services.AddScoped<IUserAuthenticatorService, UserAuthenticatorService>();
-
             services.AddCors(options => options
                 .AddPolicy("dev-policy", policy =>
                     policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
@@ -167,6 +169,8 @@ namespace EASV.Webshop2021.WebApi
                         new ProductEntity{Name = "Product3"}
                     });
                     ctx.SaveChanges();
+                    
+                    app.UseCors("dev-policy");
                 }
             }
             else

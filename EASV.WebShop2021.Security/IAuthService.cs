@@ -10,8 +10,8 @@ namespace EASV.WebShop2021.Security
         bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt);
 
         string GenerateJwtToken(LoginUser user);
-        
-        List<Permission> GetPermissions(int userId);
+
+        public List<Permission> GetPermissions(int userId);
 
         public LoginUser IsValidUserInformation(LoginUser user);
     }
