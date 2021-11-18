@@ -53,7 +53,7 @@ namespace EASV.Webshop2021.Domain.Test.Services
         [Fact]
         public void GetAll_NoParams_ReturnsAllProductsAsList()
         {
-            var expected = new List<Product> {new Product {Id = 1, Name = "Fuck"}};
+            var expected = new List<Product> {new Product {Id = 1, Name = "test"}};
             var repoMock = new Mock<IProductRepository>();
             repoMock.Setup(repository => repository.ReadAll())
                 .Returns(expected);
@@ -65,6 +65,23 @@ namespace EASV.Webshop2021.Domain.Test.Services
         }
 
         #endregion
+
+        [Fact]
+        public void GetProductByID()
+        {
+            var expected = new Product
+            {
+                Id = 1,
+                Name = "test"
+            };
+            
+            var repoMock = new Mock<IProductRepository>();
+            repoMock.Setup(repository => repository.GetProduct(expected.Id)).Returns(expected);
+            var productService = new ProductService(repoMock.Object);
+            int id = 1;
+
+            Assert.Equal(expected, productService.GetProduct(1), new ProductComparer());
+        }
 
         #region ProductService Create
         
@@ -84,10 +101,29 @@ namespace EASV.Webshop2021.Domain.Test.Services
 
             productService.CreateProduct(expected);
 
-            Assert.Equal(expected, productService.CreateProduct(expected));
+            Assert.Equal(expected, productService.CreateProduct(expected), new ProductComparer());
         }
         
         #endregion
+
+        [Fact]
+        public void DeleteProduct()
+        {
+            var product = new Product
+            {
+                Id = 1,
+                Name = "test"
+            };
+
+            var repoMock = new Mock<IProductRepository>();
+            repoMock.Setup(repository => repository.DeleteProduct(product.Id));
+
+            ProductService productService = new ProductService(repoMock.Object);
+
+            productService.DeleteProduct(product.Id);
+            
+            repoMock.Verify(repository => repository.DeleteProduct(product.Id));
+        }
     }
 
     public class ProductComparer : IEqualityComparer<Product>
