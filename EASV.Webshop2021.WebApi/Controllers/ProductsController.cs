@@ -44,6 +44,17 @@ namespace EASV.Webshop2021.WebApi.Controllers
             }
         }
 
+        [HttpGet("{id:int}")]
+        public ActionResult<ProductDto> GetProduct(int id)
+        {
+            var product = _productService.GetProduct(id);
+            return Ok(new ProductDto
+            {
+                Id = product.Id,
+                Name = product.Name
+            });
+        }
+
         [HttpPost]
         public ActionResult<Product> CreateProduct([FromBody] ProductDto dto)
         {
@@ -83,7 +94,5 @@ namespace EASV.Webshop2021.WebApi.Controllers
             });
             return Ok(dto);
         }
-        
-        
     }
 }

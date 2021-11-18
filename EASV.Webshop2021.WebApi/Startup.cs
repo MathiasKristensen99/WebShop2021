@@ -185,9 +185,9 @@ namespace EASV.Webshop2021.WebApi
                 new DbSeeder(ctx).SeedProduction();
                 ctx.Products.AddRange(new List<ProductEntity>
                 {
-                    new ProductEntity{Name = "Stor fed idiot"},
-                    new ProductEntity{Name = "Forbandet lort"},
-                    new ProductEntity{Name = "Pis og lort"}
+                    new ProductEntity{Name = "Skumbanan"},
+                    new ProductEntity{Name = "Mars bar"},
+                    new ProductEntity{Name = "Slikkepind"}
                 });
                 ctx.SaveChanges();
             }

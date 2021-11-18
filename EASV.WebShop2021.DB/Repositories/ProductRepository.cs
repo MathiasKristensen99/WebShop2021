@@ -68,5 +68,15 @@ namespace EASV.WebShop2021.DB.Repositories
                 Name = entity.Name
             };
         }
+
+        public Product GetProduct(int id)
+        {
+            return _ctx.Products.Select(entity => new Product
+                {
+                    Id = entity.Id,
+                    Name = entity.Name
+                })
+                .FirstOrDefault(product => product.Id == id);
+        }
     }
 }

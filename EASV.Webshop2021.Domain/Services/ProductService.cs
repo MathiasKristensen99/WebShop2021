@@ -26,6 +26,11 @@ namespace EASV.Webshop2021.Domain.Services
             return _productRepository.ReadAll();
         }
 
+        public Product GetProduct(int id)
+        {
+            return _productRepository.GetProduct(id);
+        }
+
         public Product CreateProduct(Product product)
         {
             return _productRepository.CreateProduct(product);
