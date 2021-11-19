@@ -22,24 +22,20 @@ namespace EASV.WebShop2021.Security
             //var authenticationService = new AuthService(Array.Empty<byte>());
             var password = "password123";
             
-            _service.CreatePasswordHash(password, out var pass, out var salt);
+            
 
             LoginUser user = new LoginUser
             {
                 UserName = "Admin",
-                PasswordHash = pass,
-                PasswordSalt = salt,
+                Password = password
             };
             
             var password1 = "password321";
-            
-            _service.CreatePasswordHash(password, out var pass1, out var salt1);
 
             LoginUser user1 = new LoginUser
             {
                 UserName = "User",
-                PasswordHash = pass1,
-                PasswordSalt = salt1
+                Password = password1
             };
 
             context.LoginUsers.Add(user);

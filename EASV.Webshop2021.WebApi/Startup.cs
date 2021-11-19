@@ -74,7 +74,6 @@ namespace EASV.Webshop2021.WebApi
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<LoginUserRepository>();
-            services.AddScoped<IUserAuthenticatorService, UserAuthenticatorService>();
             services.AddScoped<IAuthService, AuthService>();
             
             var loggerFactory = LoggerFactory.Create(builder => {
@@ -121,7 +120,6 @@ namespace EASV.Webshop2021.WebApi
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = Configuration["Jwt:Issuer"],
                     ValidAudience = Configuration["Jwt:Audience"],
-                    //IssuerSigningKey = new SymmetricSecurityKey(secretBytes),
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SecretKey"])) //Configuration["JwtToken:SecretKey"]
                 };
             });

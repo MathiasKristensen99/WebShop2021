@@ -16,30 +16,27 @@ namespace EASV.Webshop2021.WebApi.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
-        private readonly IUserAuthenticatorService _service;
-        private readonly IAuthService _authorizationService;
+        private readonly IAuthService _authService;
 
-        public LoginController(IUserAuthenticatorService service, IAuthService authorizationService)
+        public LoginController(IAuthService authorizationService)
         {
-            _service = service;
-            _authorizationService = authorizationService;
+            _authService = authorizationService;
         }
 
         [AllowAnonymous]
         [HttpPost(nameof(Login))]
         public IActionResult Login([FromBody] LoginDto dto)
         {
-            string userToken;
-            if (_service.Login(dto.Username, dto.Password, out userToken))
+            var tokenString = _authService.GenerateJwtToken(new LoginUser
             {
-                return Ok(new
-                {
-                    username = dto.Username,
-                    token = userToken
-                });
+                UserName = dto.Username,
+                Password = _authService.Hash(dto.Password)
+            });
+            if (string.IsNullOrEmpty(tokenString))
+            {
+                return BadRequest("Please pass the valid Username and Password");
             }
-
-            return Unauthorized("No access, bitch.");
+            return Ok(new { Token = tokenString, Message = "Success" });
         }
         
         [Authorize(Policy=nameof(CanReadProductsHandler))]
@@ -49,7 +46,7 @@ namespace EASV.Webshop2021.WebApi.Controllers
             var user = HttpContext.Items["LoginUser"] as LoginUser;
             if (user != null)
             {
-                List<Permission> permissions = _authorizationService.GetPermissions(user.Id);
+                List<Permission> permissions = _authService.GetPermissions(user.Id);
                 return Ok(new ProfileDto
                 {
                     Permissions = permissions.Select(p => p.Name).ToList(),

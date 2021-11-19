@@ -16,38 +16,15 @@ namespace EASV.WebShop2021.Security.Services
         private readonly IConfiguration _configuration;
         private readonly AuthDbContext _ctx;
 
-        //private byte[] secretBytes;
-
         public AuthService(IConfiguration configuration, AuthDbContext ctx)
         {
             _configuration = configuration;
             _ctx = ctx;
         }
 
-        public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        public string Hash(string password)
         {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
-        }
-
-        public bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
-        {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
-            {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                for (int i = 0; i < computedHash.Length; i++)
-                {
-                    if (computedHash[i] != storedHash[i])
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
+            return password;
         }
 
         public string GenerateJwtToken(LoginUser user)
@@ -56,24 +33,17 @@ namespace EASV.WebShop2021.Security.Services
             if (userFound == null) return null;
            
             var tokenHandler = new JwtSecurityTokenHandler();
-            Byte[] secretBytes = new byte[40];
-
-            using (var rngCsp = new System.Security.Cryptography.RNGCryptoServiceProvider() {})
-            {
-                rngCsp.GetBytes(secretBytes);
-            }
-            
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:key"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim("Id", userFound.Id.ToString()), 
-                    new Claim("UserName", userFound.UserName)
+                    new Claim("Id", userFound.Id.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(14),
                 Issuer = _configuration["Jwt:Issuer"],
                 Audience = _configuration["Jwt:Audience"],
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretBytes), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
@@ -93,8 +63,7 @@ namespace EASV.WebShop2021.Security.Services
             
             return _ctx.LoginUsers.FirstOrDefault(
                 loginUser => loginUser.UserName.Equals(user.UserName) &&
-                             loginUser.PasswordHash.Equals(user.PasswordHash));
-                             
+                             loginUser.Password.Equals(user.Password));
             
         }
     }
